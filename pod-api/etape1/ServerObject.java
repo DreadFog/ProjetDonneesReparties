@@ -8,6 +8,8 @@ public class ServerObject implements SharedObject_itf {
     private List<Client_itf> callbackClients;
     private int id; // unique identifier to callback clients
 
+    private boolean invalidateWriterSent = false;
+
     public ServerObject(Object o, int id) {
         this.lock = EtatLock.NL; // pas de lock à la création de l'objet
         this.obj = o;
@@ -34,7 +36,8 @@ public class ServerObject implements SharedObject_itf {
             case WL:
                 // Only one writer -> first element of the list
                 try {
-                    this.callbackClients.get(0).reduce_lock(this.id);
+                    this.obj = this.callbackClients.get(0).reduce_lock(this.id);
+                    this.lock = EtatLock.RL;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -74,9 +77,13 @@ public class ServerObject implements SharedObject_itf {
             case WL:
 
                 try {
+                    while (invalidateWriterSent) {
+                    }
                     // Invalidate the lock of the existing writer
                     // and remove it from the list of callbacks
-                    this.callbackClients.get(0).invalidate_writer(this.id);
+                    this.invalidateWriterSent = true;
+                    this.obj = this.callbackClients.get(0).invalidate_writer(this.id);
+                    this.invalidateWriterSent = false;
                     this.callbackClients.removeAll(callbackClients);
 
                 } catch (Exception e) {

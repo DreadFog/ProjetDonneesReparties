@@ -6,35 +6,47 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Server extends UnicastRemoteObject implements Server_itf{
 
     private List<SharedObject_itf> serverObjects;
     private static int objectCounter;
 
+    private Map<String, Integer> registry;
+
     public Server() throws RemoteException {
         this.serverObjects = new ArrayList<SharedObject_itf>();
         objectCounter = 0;
+        this.registry = new HashMap<String, Integer>();
     }
 
     @Override
     public int lookup(String name) throws RemoteException {
-        // TODO Auto-generated method stub
-        return 0;
+        try {
+            return registry.get(name);
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     @Override
     public void register(String name, int id) throws RemoteException {
-        // TODO Auto-generated method stub
-
+        this.registry.put(name, id);
     }
 
     @Override
     public int create(Object o) throws RemoteException {
+        // this.serverObjects.set(objectCounter, new ServerObject(o, objectCounter));
+
+        int objectID = objectCounter;
+        
+        this.serverObjects.add(new ServerObject(o, objectID));
+        System.out.println(this.serverObjects);
         objectCounter++;
-        this.serverObjects.set(objectCounter, new ServerObject(o, objectCounter));
-        return objectCounter;
+        return objectID;
     }
 
     @Override
@@ -49,6 +61,11 @@ public class Server extends UnicastRemoteObject implements Server_itf{
 
     @Override
     public Object lock_write(int id, Client_itf client) throws RemoteException {
+
+        serverObjects.forEach(obj -> {
+            System.out.println(obj);
+        });
+        System.out.println(serverObjects.size());
 
         ServerObject requestedServerObject = (ServerObject) this.serverObjects.get(id);
 

@@ -14,6 +14,8 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	// invoked by the user program on the client node
 	public void lock_read() {
 
+        System.out.println("Lock Read on object " + this.id);
+
 		switch (this.lock) {
 			case NL:
 				// Only call client when the read lock is not cached
@@ -37,6 +39,9 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// invoked by the user program on the client node
 	public void lock_write() {
+
+        System.out.println("Lock Write on object " + this.id);
+
 		switch (this.lock) {
 			case NL:
 				// Only call client when the write lock is not cached
@@ -51,6 +56,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 				break;
 
 			case WLC:
+                this.lock = EtatLock.WLT;
 				break;
 
 			default:
@@ -61,7 +67,10 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	// invoked by the user program on the client node
 	public synchronized void unlock() {
-		switch (this.lock) {
+		
+        System.out.println("Unlock on object " + this.id);
+
+        switch (this.lock) {
 			case RLT:
 				this.lock = EtatLock.RLC;
 				break;
@@ -81,6 +90,8 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	// Used by the server to reduce lock from Write to Read
 	public synchronized Object reduce_lock() {
 
+        System.out.println("Reduce Lock on object " + this.id);
+
 		// In case the application is only reading the object while the write lock is
 		// cached, remove the write lock
 		if (this.lock == EtatLock.RLT_WLC) {
@@ -99,6 +110,8 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	// callback invoked remotely by the server
 	public synchronized void invalidate_reader() {
 
+        System.out.println("Invalidate Reader on object " + this.id);
+        
 		// Wait until the application has finished reading the object
 		while (this.lock != EtatLock.RLC) {
 		}
@@ -107,6 +120,8 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	}
 
 	public synchronized Object invalidate_writer() {
+
+        System.out.println("Invalidate Writer on object " + this.id);
 
 		// Wait until the application has finished writing to the object
 		while (this.lock != EtatLock.WLC) {
