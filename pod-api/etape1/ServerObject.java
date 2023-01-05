@@ -78,11 +78,13 @@ public class ServerObject implements SharedObject_itf {
 
                 try {
                     while (invalidateWriterSent) {
+                        System.out.println("waiting here");
                     }
                     // Invalidate the lock of the existing writer
                     // and remove it from the list of callbacks
                     this.invalidateWriterSent = true;
                     this.obj = this.callbackClients.get(0).invalidate_writer(this.id);
+                    System.out.println("Waiting There");
                     this.invalidateWriterSent = false;
                     this.callbackClients.removeAll(callbackClients);
 

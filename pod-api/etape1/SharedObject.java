@@ -1,14 +1,17 @@
 import java.io.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class SharedObject implements Serializable, SharedObject_itf {
 
 	public final int id;
 	private EtatLock lock;
 	public Object obj; // référence à l'objet
+	private ReentrantLock mutex;
 
 	public SharedObject(int id) {
 		this.id = id;
 		this.lock = EtatLock.NL; // à vérifier
+		this.mutex = new ReentrantLock();
 	}
 
 	// invoked by the user program on the client node
@@ -41,7 +44,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	public void lock_write() {
 
         System.out.println("Lock Write on object " + this.id);
-
+		// this.mutex.lock();
 		switch (this.lock) {
 			case NL:
 				// Only call client when the write lock is not cached
@@ -63,6 +66,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 				System.out.println("[W] : Mauvaise utilisation de SharedObject.lock_write() par l'application");
 				break;
 		}
+		// this.mutex.unlock();
 	}
 
 	// invoked by the user program on the client node
@@ -84,6 +88,7 @@ public class SharedObject implements Serializable, SharedObject_itf {
 				System.out.println("[W] : Mauvaise utilisation de SharedObject.unlock() par l'application");
 				break;
 		}
+		this.notify();
 	}
 
 	// callback invoked remotely by the server
@@ -120,14 +125,21 @@ public class SharedObject implements Serializable, SharedObject_itf {
 	}
 
 	public synchronized Object invalidate_writer() {
-
+		// this.mutex.lock();
         System.out.println("Invalidate Writer on object " + this.id);
 
 		// Wait until the application has finished writing to the object
-		while (this.lock != EtatLock.WLC) {
+		/* while (this.lock != EtatLock.WLC) {
+			System.out.println("waiting in lock " + this.lock);
+		} */
+		try {
+			this.wait();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
 		this.lock = EtatLock.NL;
+		// this.mutex.unlock();
 		return this.obj;
 	}
 }

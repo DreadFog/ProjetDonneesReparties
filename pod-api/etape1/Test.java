@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class Test {
     
@@ -22,11 +23,11 @@ public class Test {
 			s = Client.create(initializedList());
 			Client.register("Entiers", s);
 		}
-        
         this.intList = s;
+        // le serveur a un objet partagé de bien initialisé. 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         
         Client.init();
         
@@ -51,6 +52,7 @@ public class Test {
                 System.exit(1);
             }
             test.intList.unlock();
+            // TimeUnit.MILLISECONDS.sleep(10);
         }
     }
 

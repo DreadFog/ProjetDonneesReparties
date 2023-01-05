@@ -1,4 +1,3 @@
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
@@ -61,17 +60,19 @@ public class Server extends UnicastRemoteObject implements Server_itf{
 
     @Override
     public Object lock_write(int id, Client_itf client) throws RemoteException {
-
+        System.out.println("Received a lock write from client " + client);
         serverObjects.forEach(obj -> {
             System.out.println(obj);
         });
-        System.out.println(serverObjects.size());
+        //System.out.println(serverObjects.size());
 
         ServerObject requestedServerObject = (ServerObject) this.serverObjects.get(id);
 
-        requestedServerObject.lock_write();
-        requestedServerObject.addCallback(client);
-
+        synchronized(requestedServerObject) {
+            requestedServerObject.lock_write();
+            System.out.println("Locked object #" + id + " for writing");
+            requestedServerObject.addCallback(client);
+        }
         return requestedServerObject.obj; // objet réel
 
     }
