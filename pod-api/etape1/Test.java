@@ -15,10 +15,10 @@ public class Test {
         return list;
     }
 
-    public Test() {
+    public Test() throws InterruptedException {
         
         SharedObject s = Client.lookup("Entiers");
-        System.out.println(s);
+        //System.out.println(s);
 		if (s == null) {
 			s = Client.create(initializedList());
 			Client.register("Entiers", s);
@@ -33,27 +33,35 @@ public class Test {
         
         Test test = new Test();
         Random rand = new Random();
-        while (true) {
+        Integer count = 0;
+        while (count < 100000) {
+            //System.out.println(count);
+            count ++;
             test.intList.lock_write();
             
             List<Integer> list = (List<Integer>)test.intList.obj;
             
-            Integer choice = list.get(rand.nextInt(list.size()));
-            choice = choice + 1;
-            choice = list.get(rand.nextInt(list.size()));
-            choice = choice - 1;
+            Integer choice = rand.nextInt(list.size());
+            list.set(choice, list.get(choice) + 1);
+            
+            choice = rand.nextInt(list.size());
+            list.set(choice, list.get(choice) - 1);
             
             int somme = 0;
             for (Integer i : list) {
                 somme += i;
             }
-            if (somme > 110 || somme < 90) {
+            if (somme != 100) {
                 System.out.println("Somme incorrecte: " + somme);
                 System.exit(1);
             }
+
+            //System.out.println(list);
+
             test.intList.unlock();
-            // TimeUnit.MILLISECONDS.sleep(10);
         }
+        System.out.println("Test " + args[0] +" réussi");
+        //System.exit(0);
     }
 
 }
