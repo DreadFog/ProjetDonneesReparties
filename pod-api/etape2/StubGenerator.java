@@ -15,7 +15,7 @@ public class StubGenerator {
     static Constructor<?>[] classConstructors;
     /**
      * args[0] : Interface source
-     * args[1] : nom de la classe destination
+     * args[1] : Class destination
      */
     public static void main(String[] args) {
 
@@ -30,64 +30,74 @@ public class StubGenerator {
             fileWriter = new FileWriter(destClass + ".java");
             // signature
             fileWriter.write("public class " + destClass + " extends SharedObject implements " + sourceItf
-                    + ", java.io.Serializable {\n");
-            // constructeur
-            List<Class<?>> type_param = Arrays.asList(classConstructors[0].getParameterTypes());
-            fileWriter.write("public " + destClass + "(");
-            Integer argc = 0;
-            String superCall = "\tsuper(";
-            String currParam;
-            for (Class<?> el: type_param) {
-                currParam = "param" + argc;
-                fileWriter.write(el.toString() + " " + currParam);
-                superCall += currParam;
-                argc++;
-                if (type_param.indexOf(el) != type_param.size() - 1) {
-                    fileWriter.write(", ");
-                    superCall += ", ";
+                    + " {\n");
+            // constructors
+            for (Constructor<?> c : classConstructors) { 
+                List<Class<?>> type_param = Arrays.asList(c.getParameterTypes());
+                fileWriter.write("public " + destClass + "(");
+                Integer argc = 0;
+                String superCall = "\tsuper(";
+                String currParam;
+                for (Class<?> el: type_param) {
+                    currParam = "param" + argc;
+                    fileWriter.write(el.toString() + " " + currParam);
+                    superCall += currParam;
+                    argc++;
+                    if (type_param.indexOf(el) != type_param.size() - 1) {
+                        fileWriter.write(", ");
+                        superCall += ", ";
+                    }
+                    
                 }
-                
+                superCall += ");\n";
+                fileWriter.write("){\n" + superCall + "}\n\n");
             }
-            superCall += ");\n";
-            fileWriter.write("){\n" + superCall + "}\n");
-            // méthodes
+            // methods
             for (Method m : classMethods) {
-                System.out.println("Method : " + m);
-                
+                System.out.println("Handling the method " + m);
+                // The abstract methods are being implemented. Hence, the abstract keyword is removed.
                 String modifier = Modifier.toString(m.getModifiers()).replace("abstract", "");
                 String returnType = m.getReturnType().getSimpleName();
                 String methodName = m.getName();
                 
-                String methodDeclaration = modifier + " " + returnType + " " + methodName + "(";
-                System.out.println("Truc 1 : " + methodDeclaration);
+                String methodDeclaration = modifier + returnType + " " + methodName + "(";
                 
-                // Paramètres
-                List<String> parameterStrings = new ArrayList<String>();
+                // Parameters
+                List<String> parsedParameters = new ArrayList<String>();
                 Parameter[] parameters = m.getParameters();
-                System.out.println("Parameters : " + parameters.toString());
                 for (Parameter p : parameters) {
-                    parameterStrings.add(p.toString());
+                    parsedParameters.add(p.toString());
                 }
-                
+                System.out.println("Parameters of the method: " + parsedParameters);
+                String parametersForCall = "";
                 String totalParameterString = "";
-                for (String paramString : parameterStrings) {
-                    if (parameterStrings.indexOf(paramString) == parameterStrings.size() - 1) {
-                        System.out.println("Param String : " + paramString);
+                for (String paramString : parsedParameters) {
+                    if (parsedParameters.indexOf(paramString) == parsedParameters.size() - 1) {
                         totalParameterString = totalParameterString.concat(paramString);
+                        parametersForCall = parametersForCall.concat(paramString.split(" ", 2)[1]);
                     } else {
-                        totalParameterString = totalParameterString.concat(paramString + ", ");
+                        totalParameterString = totalParameterString.concat(paramString.split(" ", 2)[1] + ", ");
+                        parametersForCall.concat(paramString + ",");
+
                     }
                 }
-                System.out.println("Paramètres : " + totalParameterString);
-
                 methodDeclaration = methodDeclaration.concat(totalParameterString + ")");
                 System.out.println("Method Declaration : " + methodDeclaration);
 
                 fileWriter.write(methodDeclaration + "\n");
 
-                // TODO : Corps de la méthode à générer
-                // Besoin de prendre la classe Sentence en argument ?
-
+                // the third parameter is the object type that is going to be used.
+                String objectType = args[2];
+                // first instruction: casting the type of the object
+                fileWriter.write("{\n\t" + objectType + " s = (" + objectType + ") obj;\n" );
+                // second instruction
+                if (returnType != "void"){ // 
+                    fileWriter.write("\treturn ");
+                } else {
+                    fileWriter.write("\t");
+                }
+                fileWriter.write("s." + methodName + "(" + parametersForCall + ");\n");
+                fileWriter.write("}\n\n");
             }
             
             fileWriter.write("}");
