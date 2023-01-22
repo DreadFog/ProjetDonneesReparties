@@ -1,11 +1,8 @@
-import java.rmi.*;
+import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.rmi.registry.*;
-import java.net.*;
 
 public class Client extends UnicastRemoteObject implements Client_itf {
 
@@ -15,7 +12,6 @@ public class Client extends UnicastRemoteObject implements Client_itf {
 
     private Client() throws RemoteException {
         super();
-
     }
 
     ///////////////////////////////////////////////////
@@ -31,6 +27,10 @@ public class Client extends UnicastRemoteObject implements Client_itf {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static SharedObject_itf getSharedObjectById(int id){
+        return sharedObjects.get(id);
     }
 
     // lookup in the name server

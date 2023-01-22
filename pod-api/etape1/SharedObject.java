@@ -5,7 +5,8 @@ public class SharedObject implements Serializable, SharedObject_itf {
 
 	public final int id;
 	private EtatLock lock;
-	public Object obj; // référence à l'objet
+	// [Etape 3] transient : Permet d'éviter que la sérialisation soit récursive
+	public transient Object obj; // référence à l'objet
 	private ReentrantLock mutex;
 
 	public SharedObject(int id) {
@@ -146,4 +147,18 @@ public class SharedObject implements Serializable, SharedObject_itf {
 		// this.mutex.unlock();
 		return this.obj;
 	}
+
+    public Object readResolve() throws ObjectStreamException {
+		// [Etape 3] Lors d'une désérialisation, on renvoie l'objet courant auquel on donne le bon état du verrou
+
+		SharedObject_itf localSharedObject = Client.getSharedObjectById(this.id);
+
+		if (localSharedObject == null) {
+			this.lock = EtatLock.NL;
+		} else {
+			this.lock = ((SharedObject)localSharedObject).lock;
+		}
+
+		return this;
+    }
 }

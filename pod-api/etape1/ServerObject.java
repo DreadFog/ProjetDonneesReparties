@@ -1,7 +1,9 @@
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServerObject implements SharedObject_itf {
+public class ServerObject implements SharedObject_itf, Serializable {
 
     public EtatLock lock; // NL, RL, WL only
     public Object obj; // reference to the object
@@ -104,4 +106,5 @@ public class ServerObject implements SharedObject_itf {
         // Hence, the server has no knowledge of the object being unlocked.
         System.out.println("[W] : Tried to unlock a ServerObject. Ignored");
     }
+
 }
