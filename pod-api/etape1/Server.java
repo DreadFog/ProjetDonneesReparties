@@ -38,8 +38,6 @@ public class Server extends UnicastRemoteObject implements Server_itf{
 
     @Override
     public int create(Object o) throws RemoteException {
-        // this.serverObjects.set(objectCounter, new ServerObject(o, objectCounter));
-
         int objectID = objectCounter;
         
         this.serverObjects.add(new ServerObject(o, objectID));
@@ -64,10 +62,7 @@ public class Server extends UnicastRemoteObject implements Server_itf{
         serverObjects.forEach(obj -> {
             System.out.println(obj);
         });
-        //System.out.println(serverObjects.size());
-
         ServerObject requestedServerObject = (ServerObject) this.serverObjects.get(id);
-
         synchronized(requestedServerObject) {
             requestedServerObject.lock_write();
             System.out.println("Locked object #" + id + " for writing");
@@ -83,7 +78,6 @@ public class Server extends UnicastRemoteObject implements Server_itf{
             Registry reg = LocateRegistry.createRegistry(4269);
             Naming.rebind("//localhost:4269/server", server);
         } catch (RemoteException | MalformedURLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

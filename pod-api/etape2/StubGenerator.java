@@ -7,7 +7,7 @@ import java.util.List;
 import java.io.FileWriter;
 import java.util.Arrays;
 // command one liner
-// rm -f Sentence_stub_test.java; javac -cp ../etape1 StubGenerator.java; java -cp ../etape1:. StubGenerator Sentence_itf Sentence_stub_test
+// rm -f Sentence_stub_test.java; javac -cp ../etape1 StubGenerator.java; java -cp ../etape1:. StubGenerator Sentence_itf Sentence_stub_test Sentence
 public class StubGenerator {
 
     static Method[] classMethods;

@@ -46,7 +46,6 @@ public class Client extends UnicastRemoteObject implements Client_itf {
             // a new shared object is added to the list of shared objects.
             // its obj field is null as there has not been any lock yet
             if (!sharedObjects.containsKey(id)) {
-                //System.out.println("Added object #" + id + " to client map");
                 sharedObjects.put(id, sharedObject);
             }
 
@@ -77,7 +76,6 @@ public class Client extends UnicastRemoteObject implements Client_itf {
             int id = boundServer.create(o);
             SharedObject sharedObject = new SharedObject(id);
             sharedObjects.put(id, sharedObject);
-            //System.out.println("Added object #" + id + " to client map");
             return sharedObject;
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -128,7 +126,6 @@ public class Client extends UnicastRemoteObject implements Client_itf {
     public Object invalidate_writer(int id) throws java.rmi.RemoteException {
         SharedObject chosenObject = (SharedObject) sharedObjects.get(id);
         // forwards the request to the object and returns the answer
-        //System.out.println("invalidated");
         return chosenObject.invalidate_writer();
     }
 }

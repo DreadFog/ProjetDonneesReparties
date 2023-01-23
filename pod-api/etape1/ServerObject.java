@@ -80,7 +80,6 @@ public class ServerObject implements SharedObject_itf, Serializable {
 
                 try {
                     while (invalidateWriterSent) {
-                        // System.out.println("waiting here");
                     }
                     // Invalidate the lock of the existing writer
                     // and remove it from the list of callbacks
